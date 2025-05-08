@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+  img  String
+}
+
+model Subjects {
+  id      Int       @id @default(autoincrement())
+  name    String    @unique
+  teacher Teacher[]
+  lesson  Lesson[]
+  Student Student[]
+}
+
+model Users {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique
+  password  String
+  role      Role
+  createdAt DateTime  @default(now())
+  Message   Message[]
+}
+
+model Teacher {
+  id         Int        @id @default(autoincrement())
+  name       String
+  surname    String
+  email      String?    @unique
+  phone      String     @unique
+  gender     Gender
+  createdAt  DateTime   @default(now())
+  birtday    DateTime
+  classes    Class[]
+  subject    Subjects[]
+  Lesson     Lesson[]
+  subjectsId Int
+}
+
+model Attendance {
+  id      Int      @id @default(autoincrement())
+  date    DateTime
+  present Boolean
+
+  Student   Student? @relation(fields: [studentId], references: [id])
+  studentId Int?
+  Lesson    Lesson?  @relation(fields: [lessonId], references: [id])
+  lessonId  Int?
+}
+
+model Lesson {
+  id          Int          @id @default(autoincrement())
+  name        String
+  day         Day
+  startTime   DateTime
+  endTime     DateTime
+  classId     Int
+  class       Class        @relation(fields: [classId], references: [id])
+  exams       Exam[]
+  attendances Attendance[]
+  Teacher     Teacher?     @relation(fields: [teacherId], references: [id])
+  teacherId   Int?
+  subjectId   Int
+  subject     Subjects     @relation(fields: [subjectId], references: [id])
+}
+
+model Class {
+  id        Int       @id @default(autoincrement())
+  Teacher   Teacher?  @relation(fields: [teacherId], references: [id])
+  teacherId Int?
+  student   Student[]
+  Lesson    Lesson[]
+}
+
+model Student {
+  id          Int          @id @default(autoincrement())
+  name        String
+  surname     String
+  phone       String       @unique
+  birthday    DateTime
+  email       String?      @unique
+  Class       Class?       @relation(fields: [classId], references: [id])
+  classId     Int?
+  subject     Subjects     @relation(fields: [subjectsId], references: [id])
+  createdAt   DateTime     @default(now())
+  gender      Gender
+  attendances Attendance[]
+  result      Result[]
+  subjectsId  Int
+}
+
+model Exam {
+  id        Int      @id @default(autoincrement())
+  Lesson    Lesson?  @relation(fields: [lessonId], references: [id])
+  lessonId  Int?
+  startTime DateTime
+  endTime   DateTime
+  result    Result[]
+}
+
+model Result {
+  id        Int      @id @default(autoincrement())
+  Exam      Exam?    @relation(fields: [examId], references: [id])
+  examId    Int?
+  Student   Student? @relation(fields: [studentId], references: [id])
+  studentId Int?
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+// enum Subjects {
+//   ENGLISH
+//   RUSSIAN
+//   CHINESE
+//   GERMAN
+//   IT
+// }
+
+enum Day {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+}
+
+model Message {
+  id       Int    @id @default(autoincrement())
+  message  String
+  senderId Int
+  sender   Users  @relation(fields: [senderId], references: [id])
+}

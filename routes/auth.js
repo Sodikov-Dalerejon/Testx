@@ -39,7 +39,7 @@ router.post("/", async (req, res) => {
         return res.status(400).send("Credentials are incorrect")
     }
     const token = jwt.sign({ username: user.username }, "qwerty25$")
-    res.header("x-auth-token", token).send("Auth was successful!).status(200)
+    res.header("x-auth-token", token).send("Auth was successful!").status(200)
 })
 router.put("/update/:id", authM, async (req, res) => {
     const { username, password } = req.body
